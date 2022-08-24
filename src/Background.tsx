@@ -16,9 +16,24 @@ interface Arrow {
     rotation: number;
 }
 
-const Background = ({ width, height }: CanvasProps) => {
+const debounce = (fn: Function, ms: number) => {
+    let timer: number | undefined;
 
-    const randomArrow = () => {
+    return () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            timer = undefined;
+            fn();
+        }, ms);
+    }
+}
+
+const Background = () => {
+
+    const randomArrow = (ctx: CanvasRenderingContext2D) => {
+        const width = ctx.canvas.width;
+        const height = ctx.canvas.height;
+
         const dim = Math.min(width, height);
 
         const arrow = {
@@ -32,17 +47,12 @@ const Background = ({ width, height }: CanvasProps) => {
             rotation: Math.floor(Math.random()*4)*Math.PI/2
         }
 
-        if (arrow.x+arrow.size >= width)
-            arrow.x = width-arrow.size-1;
-        if (arrow.y+arrow.size >= height)
-            arrow.y = height-arrow.size-1;
-        
         return arrow;
     }
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const requestIdRef = useRef<number|null>(null);
-    const arrows = useRef(Array.from({ length: 20 }, randomArrow));
+    const arrows = useRef<Array<Arrow>>([]);
 
     console.log(arrows.current);
 
@@ -85,7 +95,10 @@ const Background = ({ width, height }: CanvasProps) => {
         ctx.restore();
     }
 
-    const updateArrow = (arrows: Array<Arrow>) => {
+    const updateArrow = (ctx: CanvasRenderingContext2D, arrows: Array<Arrow>) => {
+        const width = ctx.canvas.width;
+        const height = ctx.canvas.height;
+
         for (var i = 0; i < arrows.length; i++) {
             const arrow = arrows[i];
 
@@ -93,7 +106,7 @@ const Background = ({ width, height }: CanvasProps) => {
             arrow.y += arrow.dy;
 
             if (arrow.x <= -arrow.size || arrow.x > width || arrow.y <= -arrow.size || arrow.y > height) {
-                const arrow = randomArrow();
+                const arrow = randomArrow(ctx);
 
                 while (!(arrow.x <= -arrow.size || arrow.x > width || arrow.y <= -arrow.size || arrow.y > height)) {
                     arrow.x -= arrow.dx;
@@ -106,7 +119,10 @@ const Background = ({ width, height }: CanvasProps) => {
     };
 
     const renderFrame = (ctx: CanvasRenderingContext2D) => {
-        updateArrow(arrows.current);
+        const width = ctx.canvas.width;
+        const height = ctx.canvas.height;
+
+        updateArrow(ctx, arrows.current);
         ctx.clearRect(0, 0, width, height);
         arrows.current.forEach((arrow) => drawArrow(ctx, arrow));
     };
@@ -121,8 +137,23 @@ const Background = ({ width, height }: CanvasProps) => {
     };
 
     useEffect(() => {
+        const ctx = canvasRef.current?.getContext('2d');
+        if (!ctx) return;
+
+        const handleResize = () => {
+            ctx.canvas.height = window.innerHeight;
+            ctx.canvas.width = window.innerWidth;
+
+            arrows.current = Array.from({ length: 20 }, () => randomArrow(ctx));
+        }
+
+        arrows.current = Array.from({ length: 20 }, () => randomArrow(ctx));
         requestIdRef.current = requestAnimationFrame(tick);
+        handleResize();
+        window.addEventListener("resize", handleResize);
+
         return () => {
+            window.removeEventListener("resize", handleResize);
             const requestId = requestIdRef.current;
             if (!requestId) return;
 
@@ -130,12 +161,7 @@ const Background = ({ width, height }: CanvasProps) => {
         };
     }, []);
 
-    return <canvas className="blur-sm" ref={canvasRef} height={height} width={width} />;
+    return <canvas className="blur-sm h-full w-full" ref={canvasRef} />;
 }
-
-Background.defaultProps = {
-    width: window.innerWidth,
-    height: window.innerHeight
-};
 
 export default Background;

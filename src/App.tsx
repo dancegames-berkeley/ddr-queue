@@ -5,7 +5,7 @@ import "./index.css"
 
 function App() {
   return (
-    <div className='bg-gray-900 h-screen'>
+    <div className='bg-gray-900 h-full w-full'>
       <Background/>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex-column text-center">
         <img src={logo}/>
