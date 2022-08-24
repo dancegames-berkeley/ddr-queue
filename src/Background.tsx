@@ -22,8 +22,8 @@ const Background = ({ width, height }: CanvasProps) => {
         const dim = Math.min(width, height);
 
         const arrow = {
-            x: width * Math.random(),
-            y: height * Math.random(),
+            x: 2*width * Math.random() - width,
+            y: 2*height * Math.random() - height,
             dx: Math.random()*2-1,
             dy: Math.random()*2-1,
             size: Math.random()*dim/2+dim/3,
@@ -42,7 +42,7 @@ const Background = ({ width, height }: CanvasProps) => {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const requestIdRef = useRef<number|null>(null);
-    const arrows = useRef(Array.from({ length: 10 }, randomArrow));
+    const arrows = useRef(Array.from({ length: 20 }, randomArrow));
 
     console.log(arrows.current);
 
