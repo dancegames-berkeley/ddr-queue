@@ -24,12 +24,12 @@ const Background = ({ width, height }: CanvasProps) => {
         const arrow = {
             x: width * Math.random(),
             y: height * Math.random(),
-            dx: Math.pow(-1, Math.floor(Math.random()*2)),
-            dy: Math.pow(-1, Math.floor(Math.random()*2)),
-            size: Math.random()*dim/2+dim/4,
-            color: 'rgb(142, 36, 170)',
-            transparency: Math.random()*0.2+0.2,
-            rotation: Math.floor(Math.random()*4)*Math.PI
+            dx: Math.random()*2-1,
+            dy: Math.random()*2-1,
+            size: Math.random()*dim/2+dim/3,
+            color: `rgb(${Math.floor(142+Math.random()*142/2-142/4)}, ${Math.floor(36+Math.random()*18-9)}, ${Math.floor(170+Math.random()*170/2-170/4)})`,
+            transparency: Math.random()*0.5+0.1,
+            rotation: Math.floor(Math.random()*4)*Math.PI/2
         }
 
         if (arrow.x+arrow.size >= width)
@@ -50,6 +50,8 @@ const Background = ({ width, height }: CanvasProps) => {
         ctx.save();
         ctx.translate(arrow.x, arrow.y);
         ctx.scale(arrow.size/137, arrow.size/143);
+        ctx.translate(137/2, 143/2);
+        ctx.rotate(arrow.rotation);
         ctx.beginPath();
 
         const coords = [
@@ -70,9 +72,9 @@ const Background = ({ width, height }: CanvasProps) => {
             [11, 54]
         ];
 
-        ctx.moveTo(0, 66);
+        ctx.moveTo(-137/2, 66-143/2);
         coords.forEach((coord) => {
-            ctx.lineTo(coord[0], coord[1]);
+            ctx.lineTo(coord[0]-137/2, coord[1]-143/2);
         });
 
         ctx.fillStyle = arrow.color;
@@ -84,13 +86,23 @@ const Background = ({ width, height }: CanvasProps) => {
     }
 
     const updateArrow = (arrows: Array<Arrow>) => {
-        arrows.forEach((arrow) => {
-            if (arrow.x < 0 || arrow.x+arrow.size >= width) arrow.dx *= -1;
-            arrow.x += arrow.dx;
+        for (var i = 0; i < arrows.length; i++) {
+            const arrow = arrows[i];
 
-            if (arrow.y < 0 || arrow.y+arrow.size >= height) arrow.dy *= -1;
+            arrow.x += arrow.dx;
             arrow.y += arrow.dy;
-        });
+
+            if (arrow.x <= -arrow.size || arrow.x > width || arrow.y <= -arrow.size || arrow.y > height) {
+                const arrow = randomArrow();
+
+                while (!(arrow.x <= -arrow.size || arrow.x > width || arrow.y <= -arrow.size || arrow.y > height)) {
+                    arrow.x -= arrow.dx;
+                    arrow.y -= arrow.dy;
+                }
+
+                arrows[i] = arrow;
+            }
+        }
     };
 
     const renderFrame = (ctx: CanvasRenderingContext2D) => {
