@@ -1,15 +1,18 @@
 import { state, useState, useEffect } from 'react'
+import { useCookies } from 'react-cookie';
+import { v4 as uuidv4 } from 'uuid';
 import Background from './Background'
 import logo from '/logo.png'
 import "./index.css"
 
 function App() {
   const [queueSize, setQueueSize] = useState(-1);
+  const [cookies, setCookie] = useCookies(['ddr-queue']);
 
   useEffect(() => {
     const socket = new WebSocket('wss://75dz4fc17b.execute-api.us-west-1.amazonaws.com/production');
 
-    const queueInfo = () => socket.send(JSON.stringify({ action: 'queueInfo' }));
+    const queueInfo = () => socket.send(JSON.stringify({ action: 'queueInfo', uuid: cookies.uuid }));
 
     socket.onopen = (event) => queueInfo();
 
@@ -23,12 +26,9 @@ function App() {
       }
     };
 
-    const intervalId = setInterval(() => queueInfo(), 10000);
+    if (!cookies.uuid) setCookie('uuid', uuidv4());
 
-    return () => {
-      socket.close();
-      clearInterval(intervalId);
-    }
+    return () => socket.close();
   }, []);
   
   return (
