@@ -1,4 +1,4 @@
-import { state, useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import Background from './Background'
@@ -8,11 +8,16 @@ import "./index.css"
 function App() {
   const [queueSize, setQueueSize] = useState(-1);
   const [cookies, setCookie] = useCookies(['ddr-queue']);
+  const [joinQueue, setJoinQueue] = useState();
 
   useEffect(() => {
+    if (!cookies.uuid) setCookie('uuid', uuidv4());
+
     const socket = new WebSocket('wss://75dz4fc17b.execute-api.us-west-1.amazonaws.com/production');
 
     const queueInfo = () => socket.send(JSON.stringify({ action: 'queueInfo', uuid: cookies.uuid }));
+    const ping = () => socket.send(JSON.stringify({ action: 'ping' }));
+    setJoinQueue(() => socket.send(JSON.stringify({ action: 'joinQueue', uuid: cookies.uuid })));
 
     socket.onopen = (event) => queueInfo();
 
@@ -23,12 +28,17 @@ function App() {
         case "queueInfo":
           setQueueSize(msg.queueSize);
           break;
+        case "pong":
+          break;
       }
     };
 
-    if (!cookies.uuid) setCookie('uuid', uuidv4());
+    const pingTimer = setInterval(ping, 300000);
 
-    return () => socket.close();
+    return () => {
+      socket.close();
+      clearInterval(pingTimer);
+    }
   }, []);
   
   return (
@@ -44,12 +54,14 @@ function App() {
         </p>
       </div>
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/4">
-        <p className="text-[10vw] sm:text-7xl font-wendy text-white" onClick={() => alert('a')}>
+        <button className="text-[10vw] sm:text-7xl font-wendy text-white" onClick={joinQueue}>
           join queue
-        </p>
+        </button>
       </div>
     </div>
   )
 }
 
 export default App
+
+// vim: ts=2 sts=2 sw=2
