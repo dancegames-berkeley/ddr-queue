@@ -8,7 +8,7 @@ import "./index.css"
 function App() {
   const [queueSize, setQueueSize] = useState(-1);
   const [cookies, setCookie] = useCookies(['ddr-queue']);
-  const [joinQueue, setJoinQueue] = useState();
+  const joinQueue = useRef<Function | undefined>();
 
   useEffect(() => {
     if (!cookies.uuid) setCookie('uuid', uuidv4());
@@ -17,11 +17,15 @@ function App() {
 
     const queueInfo = () => socket.send(JSON.stringify({ action: 'queueInfo', uuid: cookies.uuid }));
     const ping = () => socket.send(JSON.stringify({ action: 'ping' }));
-    setJoinQueue(() => socket.send(JSON.stringify({ action: 'joinQueue', uuid: cookies.uuid })));
+    joinQueue.current = () => socket.send(JSON.stringify({ action: 'joinQueue', uuid: cookies.uuid }));
 
     socket.onopen = (event) => queueInfo();
 
     socket.onmessage = (event) => {
+      console.log(event.data);
+
+      if (!event.data) return;
+      
       const msg = JSON.parse(event.data);
 
       switch(msg.action) {
@@ -54,7 +58,7 @@ function App() {
         </p>
       </div>
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/4">
-        <button className="text-[10vw] sm:text-7xl font-wendy text-white" onClick={joinQueue}>
+        <button className="text-[10vw] sm:text-7xl font-wendy text-white" onClick={() => joinQueue.current && joinQueue.current()}>
           join queue
         </button>
       </div>

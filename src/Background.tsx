@@ -54,8 +54,6 @@ const Background = () => {
     const requestIdRef = useRef<number|null>(null);
     const arrows = useRef<Array<Arrow>>([]);
 
-    console.log(arrows.current);
-
     const drawArrow = (ctx: CanvasRenderingContext2D, arrow: Arrow) => {
         ctx.save();
         ctx.translate(arrow.x, arrow.y);
