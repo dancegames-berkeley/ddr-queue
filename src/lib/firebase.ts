@@ -20,10 +20,9 @@ const app = initializeApp(firebaseConfig);
 
 export const messaging = getMessaging(app);
 
-navigator.serviceWorker.register(`${base}/firebase-messaging-sw.js`).then((registration) => {
     getToken(messaging, {
         vapidKey: 'BOFg_GZXkheciuX6MqSjd2vEoUG72BiYOpbP6z8J5kEwZoE7uu0DNGiHYII8HBjfYNM5NpJOQSGMS7Bzr8CQOk8',
-        serviceWorkerRegistration: registration
+        // serviceWorkerRegistration: registration
     }).then((currentToken) => {
         if (currentToken) {
             // send key to server
@@ -37,7 +36,6 @@ navigator.serviceWorker.register(`${base}/firebase-messaging-sw.js`).then((regis
             });
         }
     });
-});
 
 onMessage(messaging, (msg) => {
     console.log(msg.data);
