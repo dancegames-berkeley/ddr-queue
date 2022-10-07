@@ -11,7 +11,7 @@ const subscriptions = {
 function createWebsocket(url: string) {
     let socket: WebSocket | undefined;
     let openPromise: Promise<void> | undefined;
-    let pingTimer: Timer | undefined;
+    let pingTimer: NodeJS.Timer | undefined;
 
     const messageHandlers: { [key: string]: (msg: InboundMessage) => void } = {
         queueInfo: msg => subscriptions.queueInfo.forEach(subscription => subscription(msg as IMQueueInfo)),
