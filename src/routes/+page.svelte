@@ -64,7 +64,7 @@
 				<img src="{base}/logo.png" class="max-w-[50vw] max-h-[25vh]" alt="DDR Queue logo" />
 				<p class="text-[5vw] sm:text-3xl font-misolight text-white text-center">
 					{#if queueSize === 0}
-						No team in queue!
+						Queue is empty!
 					{:else if queueSize === 1}
 						1 team in queue
 					{:else}
