@@ -66,7 +66,7 @@
 			</div>
 		</div>
 	{/if}
-	<div class="absolute h-24 sm:h-36 flex justify-center items-center w-full overflow-x-hidden">
+	<div class="absolute h-16 sm:h-36 flex justify-center items-center w-full overflow-x-hidden">
 		{#if loading}
 			<div in:flyIn out:flyOut class="absolute h-full w-full bg-white" />
 			<p
