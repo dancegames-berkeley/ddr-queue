@@ -3,17 +3,19 @@
 	import { linear } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
 	import Background from '$lib/Background.svelte';
-	import { IMQueueInfo, IMJoinQueue, outboundMessages as om } from '$lib/messages';
+	import type { IMQueueInfo, IMJoinQueue } from '$lib/messages';
+	import { OMQueueInfo, OMJoinQueue } from '$lib/messages';
 	import { socket } from '$lib/websocket';
 	import { uuid } from '$lib/uuid';
 	import { base } from '$app/paths';
+	import '$lib/firebase';
 
 	let queueSize: number = -1;
 	let loading = true;
 
 	function joinQueue() {
         loading = true;
-		socket.send(om.joinQueue(uuid));
+		socket.send(new OMJoinQueue(uuid));
 	}
 
 	function flyIn(node: any) {
@@ -41,7 +43,7 @@
 		unsubscribe.push(socket.onJoinQueue((msg: IMJoinQueue) => {
 			if (!msg.success) loading = false;
 		}));
-		socket.send(om.queueInfo(uuid));
+		socket.send(new OMQueueInfo(uuid));
 
 		return () => {
 			unsubscribe.forEach(u => u());

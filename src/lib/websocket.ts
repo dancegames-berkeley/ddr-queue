@@ -1,5 +1,5 @@
 import type { IMQueueInfo, IMJoinQueue, InboundMessage, OutboundMessage } from './messages';
-import { outboundMessages as om } from './messages';
+import { OMPing } from './messages';
 
 const subscriptions = {
     all: new Set<(msg: string) => void>(),
@@ -41,7 +41,7 @@ function createWebsocket(url: string) {
 
             socket!!.onopen = event => {
                 pingTimer = setInterval(() => {
-                    om.ping().sendTo(socket!!);
+                    (new OMPing()).sendTo(socket!!);
                 }, 60000);
                 resolve();
                 openPromise = undefined;

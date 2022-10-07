@@ -40,7 +40,7 @@ export class OutboundMessage {
     }
 }
 
-class OMJoinQueue extends OutboundMessage {
+export class OMJoinQueue extends OutboundMessage {
     uuid: string;
 
     constructor(uuid: string) {
@@ -49,13 +49,13 @@ class OMJoinQueue extends OutboundMessage {
     }
 }
 
-class OMPing extends OutboundMessage {
+export class OMPing extends OutboundMessage {
     constructor() {
         super('ping');
     }
 }
 
-class OMQueueInfo extends OutboundMessage {
+export class OMQueueInfo extends OutboundMessage {
     uuid: string;
 
     constructor(uuid: string) {
@@ -64,8 +64,13 @@ class OMQueueInfo extends OutboundMessage {
     }
 }
 
-export const outboundMessages = {
-    'joinQueue': (uuid: string) => new OMJoinQueue(uuid),
-    "ping": () => new OMPing(),
-    "queueInfo": (uuid: string) => new OMQueueInfo(uuid)
+export class OMFCMKey extends OutboundMessage {
+    uuid: string;
+    key: string;
+
+    constructor(uuid: string, key: string) {
+        super('fcmkey');
+        this.uuid = uuid;
+        this.key = key;
+    }
 }
