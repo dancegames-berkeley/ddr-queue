@@ -1,15 +1,17 @@
-import type { IMQueueInfo, InboundMessage, OutboundMessage } from './messages.js'
+import type { IMQueueInfo, IMJoinQueue, InboundMessage, OutboundMessage } from './messages.js'
 
 const subscriptions = {
     all: new Set<(msg: string) => void>(),
-    queueInfo: new Set<(msg: IMQueueInfo) => void>()
+    queueInfo: new Set<(msg: IMQueueInfo) => void>(),
+    joinQueue: new Set<(msg: IMJoinQueue) => void>()
 }
 
 // TODO handle disconnect->reconnect logic with exponential timeout
 function createWebsocket(url: string) {
     let socket: WebSocket | undefined, openPromise: Promise<void> | undefined;
     const messageHandlers: { [key: string]: (msg: InboundMessage) => void } = {
-        queueInfo: msg => subscriptions.queueInfo.forEach(subscription => subscription(msg as IMQueueInfo))
+        queueInfo: msg => subscriptions.queueInfo.forEach(subscription => subscription(msg as IMQueueInfo)),
+        joinQueue: msg => subscriptions.joinQueue.forEach(subscription => subscription(msg as IMJoinQueue))
     }
 
     function open() {
@@ -58,6 +60,12 @@ function createWebsocket(url: string) {
             subscriptions.queueInfo.add(handler);
             return () => {
                 subscriptions.queueInfo.delete(handler);
+            }
+        },
+        onJoinQueue(handler: (msg: IMJoinQueue) => void) {
+            subscriptions.joinQueue.add(handler);
+            return () => {
+                subscriptions.joinQueue.delete(handler);
             }
         }
     }

@@ -3,7 +3,7 @@
 	import { linear } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
 	import Background from '$lib/Background.svelte';
-	import { IMQueueInfo, outboundMessages as om } from '$lib/messages';
+	import { IMQueueInfo, IMJoinQueue, outboundMessages as om } from '$lib/messages';
 	import { socket } from '$lib/websocket';
 	import { uuid } from '$lib/uuid';
 	import { base } from '$app/paths';
@@ -33,15 +33,18 @@
 	}
 
 	onMount(() => {
-		const unsubscribe = socket.onQueueInfo((msg: IMQueueInfo) => {
+		const unsubscribe: (() => void)[] = [];
+		unsubscribe.push(socket.onQueueInfo((msg: IMQueueInfo) => {
             loading = false;
 			queueSize = msg.queueSize;
-			console.log(msg);
-		});
+		}));
+		unsubscribe.push(socket.onJoinQueue((msg: IMJoinQueue) => {
+			if (!msg.success) loading = false;
+		}));
 		socket.send(om.queueInfo(uuid));
 
 		return () => {
-			unsubscribe();
+			unsubscribe.forEach(u => u());
 		};
 	});
 </script>

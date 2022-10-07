@@ -1,5 +1,6 @@
 export const inboundMessages: { [key: string]: () => object } = {
-    queueInfo: () => new IMQueueInfo
+    queueInfo: () => new IMQueueInfo,
+    joinQueue: () => new IMJoinQueue
 };
 
 export class InboundMessage {
@@ -19,6 +20,12 @@ export class IMQueueInfo extends InboundMessage {
     posInQueue: number | undefined;
 
     constructor() { super("queueInfo"); }
+}
+
+export class IMJoinQueue extends InboundMessage {
+    success!: boolean;
+
+    constructor() { super('joinQueue'); }
 }
 
 export class OutboundMessage {
