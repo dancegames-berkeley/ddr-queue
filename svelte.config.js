@@ -13,7 +13,7 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		paths: {
-			base: process.env.DQ || ''
+			base: process.env.DDR_QUEUE_BASE_URL || ''
 		}
 	}
 };
