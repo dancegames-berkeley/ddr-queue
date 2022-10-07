@@ -1,4 +1,5 @@
-import type { IMQueueInfo, IMJoinQueue, InboundMessage, OutboundMessage } from './messages.js'
+import type { IMQueueInfo, IMJoinQueue, InboundMessage, OutboundMessage } from './messages';
+import { outboundMessages as om } from './messages';
 
 const subscriptions = {
     all: new Set<(msg: string) => void>(),
@@ -8,7 +9,10 @@ const subscriptions = {
 
 // TODO handle disconnect->reconnect logic with exponential timeout
 function createWebsocket(url: string) {
-    let socket: WebSocket | undefined, openPromise: Promise<void> | undefined;
+    let socket: WebSocket | undefined;
+    let openPromise: Promise<void> | undefined;
+    let pingTimer: Timer | undefined;
+
     const messageHandlers: { [key: string]: (msg: InboundMessage) => void } = {
         queueInfo: msg => subscriptions.queueInfo.forEach(subscription => subscription(msg as IMQueueInfo)),
         joinQueue: msg => subscriptions.joinQueue.forEach(subscription => subscription(msg as IMJoinQueue))
@@ -25,6 +29,10 @@ function createWebsocket(url: string) {
             messageHandlers[msg.action]?.(msg);
         }
 
+        socket.onclose = () => {
+            clearInterval(pingTimer);
+        };
+
         openPromise = new Promise((resolve, reject) => {
             socket!!.onerror = error => {
                 reject(error);
@@ -32,6 +40,9 @@ function createWebsocket(url: string) {
             };
 
             socket!!.onopen = event => {
+                pingTimer = setInterval(() => {
+                    om.ping().sendTo(socket!!);
+                }, 60000);
                 resolve();
                 openPromise = undefined;
             }
