@@ -50,7 +50,7 @@
 </script>
 
 <Background />
-<div class="flex items-center h-screen w-screen">
+<div class="absolute flex items-center h-full w-full">
 	{#if !loading}
 		<div class="flex w-full h-full" transition:fade={{ duration: 150 }}>
 			<div class="flex flex-col items-center m-auto">
