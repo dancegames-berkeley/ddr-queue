@@ -10,7 +10,8 @@
 	import { base } from '$app/paths';
 	import '$lib/firebase';
 
-	let queueSize: number = -1;
+	let queueSize: number | undefined;
+	let posInQueue: number | undefined;
 	let loading = true;
 
 	function joinQueue() {
@@ -36,9 +37,13 @@
 
 	onMount(() => {
 		const unsubscribe: (() => void)[] = [];
+		unsubscribe.push(socket.subscribe((msg: string) => {
+			console.log(msg);
+		}));
 		unsubscribe.push(socket.onQueueInfo((msg: IMQueueInfo) => {
             loading = false;
 			queueSize = msg.queueSize;
+			posInQueue = msg.posInQueue;
 		}));
 		unsubscribe.push(socket.onJoinQueue((msg: IMJoinQueue) => {
 			if (!msg.success) loading = false;
@@ -58,15 +63,36 @@
 			<div class="flex flex-col items-center m-auto">
 				<img src="{base}/logo.png" class="max-w-[50vw] max-h-[25vh]" alt="DDR Queue logo" />
 				<p class="text-[5vw] sm:text-3xl font-misolight text-white text-center">
-					{queueSize} teams in queue
+					{#if queueSize === 0}
+						No team in queue!
+					{:else if queueSize === 1}
+						1 team in queue
+					{:else}
+						{queueSize} teams in queue
+					{/if}
 				</p>
 				<p class="text-[5vw] sm:text-3xl font-misolight text-white text-center">
-					Estimated wait time: 100 years
+					Estimated wait time:
+					{#if queueSize}
+						{(posInQueue === undefined ? queueSize : posInQueue)*5} minutes
+					{:else}
+						play now!
+					{/if}
 				</p>
 			</div>
 			<div class="absolute bottom-0 w-full text-center">
 				<button on:click={joinQueue} class="text-[10vw] sm:text-7xl font-wendy text-white">
-					join queue
+					{#if posInQueue === undefined}
+						join queue
+					{:else}
+						{#if posInQueue === 0}
+							your turn
+						{:else if posInQueue === 1}
+							next in queue
+						{:else}
+							{posInQueue}th in queue
+						{/if}
+					{/if}
 				</button>
 			</div>
 		</div>
