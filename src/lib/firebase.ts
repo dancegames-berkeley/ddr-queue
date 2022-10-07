@@ -26,7 +26,6 @@ export const messaging = getMessaging(app);
     }).then((currentToken) => {
         if (currentToken) {
             // send key to server
-            console.log(`currentToken: ${currentToken}`);
             socket.send(new OMFCMKey(uuid, currentToken));
         } else {
             Notification.requestPermission().then((permission) => {
