@@ -1,5 +1,0 @@
-#!/bin/bash
-
-tmux \
-    new-session 'cd client; pnpm run dev' \; \
-    split-window 'cd server; FLASK_DEBUG=1 poetry run flask run'
