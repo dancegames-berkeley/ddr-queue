@@ -1,5 +1,7 @@
+import { base } from '$app/paths';
+
 export async function token(uuid: string, token: string) {
-    await fetch('/token', {
+    await fetch(`${base}/token`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -9,7 +11,7 @@ export async function token(uuid: string, token: string) {
 }
 
 export async function queueInfo(uuid: string | undefined = undefined) {
-    let url = '/queue-info';
+    let url = `${base}/queue-info`;
 
     if (uuid) url += `/${uuid}`;
 
@@ -23,7 +25,7 @@ export async function queueInfo(uuid: string | undefined = undefined) {
 }
 
 export async function joinQueue(uuid: string) {
-    const response = await fetch('/join-queue', {
+    const response = await fetch(`${base}/join-queue`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
