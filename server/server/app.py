@@ -34,4 +34,4 @@ def proxy(host, path):
 @app.route('/<path:path>')
 def client(path):
     if IS_DEV: return proxy(VITE_DEV_SERVER_HOST, path)
-    return send_from_directory(CLIENT_DIR, path)
+    return send_from_directory(CLIENT_DIR, path if len(path) > 0 else 'index.html')

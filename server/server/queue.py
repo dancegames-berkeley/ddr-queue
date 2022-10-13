@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from functools import wraps
 
 import json
 import redis
@@ -10,7 +11,8 @@ redis = redis.Redis(decode_responses=True)
 queue = Blueprint('queue', __name__)
 
 def require_key(func):
-    def wrapper():
+    @wraps(func)
+    def wrapper(*args, **kwargs):
         key = request.form.get('key', None)
 
         apikey = redis.get('apikey')
@@ -18,7 +20,7 @@ def require_key(func):
         if apikey is None or key != apikey:
             return 'Unauthorized', 401
         
-        func()
+        return func(*args, **kwargs)
     return wrapper
 
 def broadcast():
