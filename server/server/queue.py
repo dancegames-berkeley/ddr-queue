@@ -9,6 +9,18 @@ redis = redis.Redis(decode_responses=True)
 
 queue = Blueprint('queue', __name__)
 
+def require_key(func):
+    def wrapper():
+        key = request.form.get('key', None)
+
+        apikey = redis.get('apikey')
+
+        if apikey is None or key != apikey:
+            return 'Unauthorized', 401
+        
+        func()
+    return wrapper
+
 def broadcast():
     message = messaging.Message(
         data={'action': 'update'},
@@ -79,14 +91,8 @@ def join_queue():
     return queue_info(uuid)
 
 @queue.route('/dequeue', methods=['POST'])
+@require_key
 def dequeue():
-    key = request.form.get('key', None)
-
-    apikey = redis.get('apikey')
-
-    if apikey is None or key != apikey:
-        return 'Unauthorized', 401
-    
     next_uuid = redis.lpop('queue')
 
     if next_uuid is None:
@@ -105,4 +111,10 @@ def dequeue():
 
     broadcast()
 
+    return 'OK'
+
+@queue.route('/status/<status>')
+@require_key
+def status(status):
+    redis.set('status', status)
     return 'OK'
