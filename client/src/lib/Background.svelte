@@ -27,7 +27,7 @@
         (function loop() {
             ctx = canvas.getContext('2d')!!;
 
-            if (ctx) render();
+            render();
 
             frameHandle = requestAnimationFrame(loop);
         })();

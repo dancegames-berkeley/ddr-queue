@@ -1,9 +1,8 @@
 import { base } from '$app/paths';
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { socket } from './websocket';
-import { OMFCMKey } from './messages';
 import { uuid } from './uuid';
+import { token } from './requests';
 
 const firebaseConfig = {
 	apiKey: 'AIzaSyCipMIrB4eZOTg4kX88Ke_uFynZwDVhomM',
@@ -18,7 +17,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const messaging = getMessaging(app);
+const messaging = getMessaging(app);
 
 navigator.serviceWorker.register(`${base}/firebase-messaging-sw.js`).then((registration) => {
     getToken(messaging, {
@@ -26,8 +25,8 @@ navigator.serviceWorker.register(`${base}/firebase-messaging-sw.js`).then((regis
         serviceWorkerRegistration: registration
     }).then((currentToken) => {
         if (currentToken) {
-            // send key to server
-            socket.send(new OMFCMKey(uuid, currentToken));
+            console.log(currentToken)
+            token(uuid, currentToken)
         } else {
             Notification.requestPermission().then((permission) => {
                 if (permission === 'granted') {
@@ -36,8 +35,26 @@ navigator.serviceWorker.register(`${base}/firebase-messaging-sw.js`).then((regis
             });
         }
     });
-});
+}).catch(e => console.log(e));
+
+type MessageHandler = (data: { [key: string]: string } | undefined) => void;
+
+const subscriptions = new Set<MessageHandler>();
 
 onMessage(messaging, (msg) => {
-    console.log(msg.data);
+    subscriptions.forEach(h => h(msg.data));
+
+    if (msg.notification) {
+        new Notification(msg.notification.title || 'DDR Queue', { body: msg.notification.body })
+    }
 });
+
+export const Firebase = {
+    onMessage(handler: MessageHandler) {
+        subscriptions.add(handler);
+
+        return () => {
+            subscriptions.delete(handler);
+        }
+    }
+};

@@ -39,6 +39,7 @@
   },
   "type": "module",
   "dependencies": {
+    "devalue": "^4.0.0",
     "firebase": "^9.11.0",
     "universal-cookie": "^4.0.4",
     "uuid": "^9.0.0"
