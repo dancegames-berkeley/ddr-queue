@@ -89,7 +89,7 @@ def join_queue():
 
         redis.set(f'counter::{uuid}', counter)
 
-    broadcast()
+        broadcast()
     return queue_info(uuid)
 
 @queue.route('/dequeue', methods=['POST'])
