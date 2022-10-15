@@ -16,7 +16,6 @@
   "devDependencies": {
     "@playwright/test": "^1.27.0-alpha-sep-28-2022",
     "@sveltejs/adapter-auto": "next",
-    "@sveltejs/adapter-static": "^1.0.0-next.43",
     "@sveltejs/kit": "next",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
@@ -39,8 +38,8 @@
   },
   "type": "module",
   "dependencies": {
-    "devalue": "^4.0.0",
     "firebase": "^9.11.0",
+    "firebase-admin": "^11.1.0",
     "universal-cookie": "^4.0.4",
     "uuid": "^9.0.0"
   }
